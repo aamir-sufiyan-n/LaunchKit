@@ -34,6 +34,12 @@ SET status = $3, updated_at = NOW()
 WHERE project_id = $1 AND user_id = $2
 RETURNING *;
 
+-- name: GetProjectMembership :one
+SELECT project_id, role
+FROM project_members
+WHERE user_id = $1 AND status = 'active'
+LIMIT 1;
+
 -- name: RemoveProjectMember :exec
 DELETE FROM project_members
 WHERE project_id = $1 AND user_id = $2;

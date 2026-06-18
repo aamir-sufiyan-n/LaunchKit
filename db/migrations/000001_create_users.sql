@@ -1,11 +1,13 @@
 -- +goose Up
+-- +goose StatementBegin
 CREATE OR REPLACE FUNCTION update_updated_at()
 RETURNS TRIGGER AS $$
 BEGIN
     NEW.updated_at = NOW();
     RETURN NEW;
 END;
-$$ language 'plpgsql';
+$$ LANGUAGE plpgsql;
+-- +goose StatementEnd  
 
 CREATE TABLE users (
     --Internal System Identity
@@ -17,8 +19,9 @@ CREATE TABLE users (
     display_name        VARCHAR(100),
     avatar_url          TEXT,
 
-    user_type VARCHAR(20) NOT NULL DEFAULT 'b2c' CHECK (user_type IN ('b2c', 'b2b', 'admin'));
-
+    user_type VARCHAR(20) NOT NULL DEFAULT 'b2c'
+    CHECK (user_type IN ('b2c', 'b2b', 'admin')),
+    
     -- Personal B2C Social Identities (For Verification Engines)
     twitter_id          VARCHAR(50)  UNIQUE,
     twitter_handle      VARCHAR(100),

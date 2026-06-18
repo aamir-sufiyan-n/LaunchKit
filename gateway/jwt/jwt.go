@@ -15,6 +15,8 @@ type TokenPayload struct {
 	WalletAddress string
 	Role          string
 	ProjectID     string
+	ProjectRole	string 
+	Version int64
 	IsOnboarded   bool
 }
 
@@ -24,13 +26,23 @@ type TokenPair struct {
 	TokenID      string
 }
 
+// type AccessClaims struct {
+// 	UserID        string `json:"uid"`
+// 	WalletAddress string `json:"wallet"`
+// 	Role          string `json:"role"`
+// 	ProjectID     string `json:"pid,omitempty"`
+// 	IsOnboarded   bool   `json:"onboarded"`
+// 	jwt.RegisteredClaims
+// }
 type AccessClaims struct {
-	UserID        string `json:"uid"`
-	WalletAddress string `json:"wallet"`
-	Role          string `json:"role"`
-	ProjectID     string `json:"pid,omitempty"`
-	IsOnboarded   bool   `json:"onboarded"`
-	jwt.RegisteredClaims
+    UserID        string `json:"uid"`
+    WalletAddress string `json:"wallet"`
+    Role          string `json:"role"`
+    ProjectID     string `json:"pid,omitempty"`
+    ProjectRole   string `json:"project_role,omitempty"`
+    Version       int64  `json:"ver"`
+    IsOnboarded   bool   `json:"onboarded"`
+    jwt.RegisteredClaims
 }
 
 type RefreshClaims struct {
@@ -52,16 +64,18 @@ func GenerateTokenPair(payload TokenPayload, cfg Config) (*TokenPair, error) {
 
 	accessExpiry := time.Duration(cfg.AccessExpiryMinutes) * time.Minute
 	accessClaims := &AccessClaims{
-		UserID:        payload.UserID,
-		WalletAddress: payload.WalletAddress,
-		Role:          payload.Role,
-		ProjectID:     payload.ProjectID,
-		IsOnboarded:   payload.IsOnboarded,
-		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(accessExpiry)),
-			IssuedAt:  jwt.NewNumericDate(time.Now()),
-		},
-	}
+    UserID:        payload.UserID,
+    WalletAddress: payload.WalletAddress,
+    Role:          payload.Role,
+    ProjectID:     payload.ProjectID,
+    ProjectRole:   payload.ProjectRole,
+    Version:       payload.Version,
+    IsOnboarded:   payload.IsOnboarded,
+    RegisteredClaims: jwt.RegisteredClaims{
+        ExpiresAt: jwt.NewNumericDate(time.Now().Add(accessExpiry)),
+        IssuedAt:  jwt.NewNumericDate(time.Now()),
+    },
+}
 	accessToken, err := jwt.NewWithClaims(jwt.SigningMethodHS256, accessClaims).SignedString([]byte(cfg.AccessTokenSecret))
 	if err != nil {
 		return nil, fmt.Errorf("error signing access token: %w", err)
